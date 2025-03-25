@@ -1,4 +1,4 @@
-
+--Updated tables and Please scroll down for Assignment 3 below 
 --Assignment 1
 create database HMBank;
 use HMBank;
