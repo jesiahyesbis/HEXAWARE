@@ -1,0 +1,14 @@
+E:\hexaware\Bank Management System\BankingManagementOOP\BankingManagementOop\BankingManagementOop\bin\Debug\net8.0\BankingManagementOop.exe
+E:\hexaware\Bank Management System\BankingManagementOOP\BankingManagementOop\BankingManagementOop\bin\Debug\net8.0\BankingManagementOop.deps.json
+E:\hexaware\Bank Management System\BankingManagementOOP\BankingManagementOop\BankingManagementOop\bin\Debug\net8.0\BankingManagementOop.runtimeconfig.json
+E:\hexaware\Bank Management System\BankingManagementOOP\BankingManagementOop\BankingManagementOop\bin\Debug\net8.0\BankingManagementOop.dll
+E:\hexaware\Bank Management System\BankingManagementOOP\BankingManagementOop\BankingManagementOop\bin\Debug\net8.0\BankingManagementOop.pdb
+E:\hexaware\Bank Management System\BankingManagementOOP\BankingManagementOop\BankingManagementOop\obj\Debug\net8.0\BankingManagementOop.GeneratedMSBuildEditorConfig.editorconfig
+E:\hexaware\Bank Management System\BankingManagementOOP\BankingManagementOop\BankingManagementOop\obj\Debug\net8.0\BankingManagementOop.AssemblyInfoInputs.cache
+E:\hexaware\Bank Management System\BankingManagementOOP\BankingManagementOop\BankingManagementOop\obj\Debug\net8.0\BankingManagementOop.AssemblyInfo.cs
+E:\hexaware\Bank Management System\BankingManagementOOP\BankingManagementOop\BankingManagementOop\obj\Debug\net8.0\BankingManagementOop.csproj.CoreCompileInputs.cache
+E:\hexaware\Bank Management System\BankingManagementOOP\BankingManagementOop\BankingManagementOop\obj\Debug\net8.0\BankingManagementOop.dll
+E:\hexaware\Bank Management System\BankingManagementOOP\BankingManagementOop\BankingManagementOop\obj\Debug\net8.0\refint\BankingManagementOop.dll
+E:\hexaware\Bank Management System\BankingManagementOOP\BankingManagementOop\BankingManagementOop\obj\Debug\net8.0\BankingManagementOop.pdb
+E:\hexaware\Bank Management System\BankingManagementOOP\BankingManagementOop\BankingManagementOop\obj\Debug\net8.0\BankingManagementOop.genruntimeconfig.cache
+E:\hexaware\Bank Management System\BankingManagementOOP\BankingManagementOop\BankingManagementOop\obj\Debug\net8.0\ref\BankingManagementOop.dll
