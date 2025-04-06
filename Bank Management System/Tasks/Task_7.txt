@@ -1,0 +1,146 @@
+
+//Task 7
+using System;
+
+// Customer Class
+class Customer
+{
+    public int CustomerID { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string Email { get; set; }
+    public string Phone { get; set; }
+    public string Address { get; set; }
+
+    // Parameterized Constructor
+    public Customer(int id, string firstName, string lastName, string email, string phone, string address)
+    {
+        CustomerID = id;
+        FirstName = firstName;
+        LastName = lastName;
+        Email = email;
+        Phone = phone;
+        Address = address;
+    }
+
+    // Method to display customer information
+    public void DisplayCustomerInfo()
+    {
+        Console.WriteLine($"Customer ID: {CustomerID}, Name: {FirstName} {LastName}, Email: {Email}, Phone: {Phone}, Address: {Address}");
+    }
+}
+
+// Account Class
+class Account
+{
+    public int AccountNumber { get; set; }
+    public string AccountType { get; set; }
+    public double Balance { get; private set; }
+    private const double InterestRate = 4.5; // Fixed Interest Rate
+
+    // Parameterized Constructor
+    public Account(int accNum, string accType, double balance)
+    {
+        AccountNumber = accNum;
+        AccountType = accType;
+        Balance = balance;
+    }
+
+    // Method to deposit money
+    public void Deposit(double amount)
+    {
+        if (amount > 0)
+        {
+            Balance += amount;
+            Console.WriteLine($"Deposited {amount:C}. New Balance: {Balance:C}");
+        }
+        else
+        {
+            Console.WriteLine("Deposit amount must be positive.");
+        }
+    }
+
+    // Method to withdraw money
+    public void Withdraw(double amount)
+    {
+        if (amount > 0 && amount <= Balance)
+        {
+            Balance -= amount;
+            Console.WriteLine($"Withdrawn {amount:C}. New Balance: {Balance:C}");
+        }
+        else
+        {
+            Console.WriteLine("Insufficient balance or invalid amount.");
+        }
+    }
+
+    // Method to calculate interest
+    public void CalculateInterest()
+    {
+        if (AccountType.ToLower() == "savings")
+        {
+            double interest = (Balance * InterestRate) / 100;
+            Balance += interest;
+            Console.WriteLine($"Interest of {interest:C} added. New Balance: {Balance:C}");
+        }
+        else
+        {
+            Console.WriteLine("Interest calculation is only applicable for savings accounts.");
+        }
+    }
+
+    // Method to display account details
+    public void DisplayAccountInfo()
+    {
+        Console.WriteLine($"Account Number: {AccountNumber}, Type: {AccountType}, Balance: {Balance:C}");
+    }
+}
+
+// Bank Class
+class Bank
+{
+    static void Main()
+    {
+        // Getting customer details from user input
+        Console.Write("Enter Customer ID: ");
+        int customerId = int.Parse(Console.ReadLine());
+        Console.Write("Enter First Name: ");
+        string firstName = Console.ReadLine();
+        Console.Write("Enter Last Name: ");
+        string lastName = Console.ReadLine();
+        Console.Write("Enter Email: ");
+        string email = Console.ReadLine();
+        Console.Write("Enter Phone Number: ");
+        string phone = Console.ReadLine();
+        Console.Write("Enter Address: ");
+        string address = Console.ReadLine();
+
+        Customer customer1 = new Customer(customerId, firstName, lastName, email, phone, address);
+        customer1.DisplayCustomerInfo();
+
+        // Getting account details from user input
+        Console.Write("Enter Account Number: ");
+        int accountNumber = int.Parse(Console.ReadLine());
+        Console.Write("Enter Account Type (Savings/Current): ");
+        string accountType = Console.ReadLine();
+        Console.Write("Enter Initial Balance: ");
+        double initialBalance = double.Parse(Console.ReadLine());
+
+        Account account1 = new Account(accountNumber, accountType, initialBalance);
+        account1.DisplayAccountInfo();
+
+        // Performing transactions based on user input
+        Console.Write("Enter amount to deposit: ");
+        double depositAmount = double.Parse(Console.ReadLine());
+        account1.Deposit(depositAmount);
+
+        Console.Write("Enter amount to withdraw: ");
+        double withdrawAmount = double.Parse(Console.ReadLine());
+        account1.Withdraw(withdrawAmount);
+
+        account1.CalculateInterest();
+        
+        // Display final account details
+        account1.DisplayAccountInfo();
+    }
+}

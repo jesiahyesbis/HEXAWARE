@@ -1,0 +1,170 @@
+//Task 9
+
+using System;
+
+// Abstract class representing a bank account
+abstract class BankAccount
+{
+    public string AccountNumber { get; set; }
+    public string CustomerName { get; set; }
+    public float Balance { get; protected set; }
+
+    public BankAccount() { }
+    public BankAccount(string accountNumber, string customerName, float balance)
+    {
+        AccountNumber = accountNumber;
+        CustomerName = customerName;
+        Balance = balance;
+    }
+
+    public void PrintAccountInfo()
+    {
+        Console.WriteLine($"Account Number: {AccountNumber}\nCustomer Name: {CustomerName}\nBalance: {Balance:C}");
+    }
+
+    public abstract void Deposit(float amount);
+    public abstract void Withdraw(float amount);
+    public abstract void CalculateInterest();
+}
+
+
+
+// Savings Account
+class SavingsAccount : BankAccount
+{
+    private float interestRate;
+
+    public SavingsAccount(string accountNumber, string customerName, float balance, float interestRate)
+        : base(accountNumber, customerName, balance)
+    {
+        this.interestRate = interestRate;
+    }
+
+    public override void Deposit(float amount)
+    {
+        Balance += amount;
+        Console.WriteLine($"Deposited {amount:C}. New Balance: {Balance:C}");
+    }
+
+    public override void Withdraw(float amount)
+    {
+        if (amount > Balance)
+        {
+            Console.WriteLine("Insufficient balance.");
+        }
+        else
+        {
+            Balance -= amount;
+            Console.WriteLine($"Withdrawn {amount:C}. New Balance: {Balance:C}");
+        }
+    }
+
+    public override void CalculateInterest()
+    {
+        float interest = Balance * (interestRate / 100);
+        Balance += interest;
+        Console.WriteLine($"Interest Added: {interest:C}. New Balance: {Balance:C}");
+    }
+}
+
+
+
+// Current Account
+class CurrentAccount : BankAccount
+{
+    private const float OverdraftLimit = 500.0f;
+
+    public CurrentAccount(string accountNumber, string customerName, float balance)
+        : base(accountNumber, customerName, balance) { }
+
+    public override void Deposit(float amount)
+    {
+        Balance += amount;
+        Console.WriteLine($"Deposited {amount:C}. New Balance: {Balance:C}");
+    }
+
+    public override void Withdraw(float amount)
+    {
+        if (amount > Balance + OverdraftLimit)
+        {
+            Console.WriteLine("Overdraft limit exceeded.");
+        }
+        else
+        {
+            Balance -= amount;
+            Console.WriteLine($"Withdrawn {amount:C}. New Balance: {Balance:C}");
+        }
+    }
+
+    public override void CalculateInterest()
+    {
+        Console.WriteLine("No interest for Current Account.");
+    }
+}
+
+
+
+
+// Bank class to manage accounts
+class Bank
+{
+    static void Main()
+    {
+        BankAccount account = null;
+        Console.WriteLine("Choose Account Type:\n1. Savings Account\n2. Current Account");
+        int choice = int.Parse(Console.ReadLine());
+
+        Console.Write("Enter Account Number: ");
+        string accNumber = Console.ReadLine();
+        Console.Write("Enter Customer Name: ");
+        string name = Console.ReadLine();
+        Console.Write("Enter Initial Balance: ");
+        float balance = float.Parse(Console.ReadLine());
+
+        switch (choice)
+        {
+            case 1:
+                Console.Write("Enter Interest Rate (%): ");
+                float rate = float.Parse(Console.ReadLine());
+                account = new SavingsAccount(accNumber, name, balance, rate);
+                break;
+            case 2:
+                account = new CurrentAccount(accNumber, name, balance);
+                break;
+            default:
+                Console.WriteLine("Invalid choice.");
+                return;
+        }
+
+        account.PrintAccountInfo();
+
+        while (true)
+        {
+            Console.WriteLine("\nChoose an action:\n1. Deposit\n2. Withdraw\n3. Calculate Interest\n4. Exit");
+            int action = int.Parse(Console.ReadLine());
+
+            switch (action)
+            {
+                case 1:
+                    Console.Write("Enter amount to deposit: ");
+                    float depositAmount = float.Parse(Console.ReadLine());
+                    account.Deposit(depositAmount);
+                    break;
+                case 2:
+                    Console.Write("Enter amount to withdraw: ");
+                    float withdrawAmount = float.Parse(Console.ReadLine());
+                    account.Withdraw(withdrawAmount);
+                    break;
+                case 3:
+                    account.CalculateInterest();
+                    break;
+                case 4:
+                    Console.WriteLine("Exiting...");
+                    return;
+                default:
+                    Console.WriteLine("Invalid action.");
+                    break;
+            }
+        }
+    }
+}

@@ -1,0 +1,289 @@
+//Task 10
+
+using System;
+using System.Collections.Generic;
+
+// Customer Class
+class Customer
+{
+    public int CustomerID { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string Email { get; set; }
+    public string PhoneNumber { get; set; }
+    public string Address { get; set; }
+
+    public Customer() { }
+
+    public Customer(int customerID, string firstName, string lastName, string email, string phoneNumber, string address)
+    {
+        CustomerID = customerID;
+        FirstName = firstName;
+        LastName = lastName;
+        Email = IsValidEmail(email) ? email : "Invalid Email";
+        PhoneNumber = IsValidPhoneNumber(phoneNumber) ? phoneNumber : "Invalid Phone Number";
+        Address = address;
+    }
+
+    private bool IsValidEmail(string email)
+    {
+        return email.Contains("@") && email.Contains(".");
+    }
+
+    private bool IsValidPhoneNumber(string phoneNumber)
+    {
+        if (phoneNumber.Length != 10) return false;
+        foreach (char c in phoneNumber)
+        {
+            if (!char.IsDigit(c)) return false;
+        }
+        return true;
+    }
+
+    public void PrintCustomerInfo()
+    {
+        Console.WriteLine("Customer Details:");
+        Console.WriteLine("ID: " + CustomerID);
+        Console.WriteLine("Name: " + FirstName + " " + LastName);
+        Console.WriteLine("Email: " + Email);
+        Console.WriteLine("Phone: " + PhoneNumber);
+        Console.WriteLine("Address: " + Address);
+        Console.WriteLine();
+    }
+}
+
+
+
+// Account Class
+class Account
+{
+    private static long accountNumberSeed = 1001;
+    public long AccountNumber { get; }
+    public string AccountType { get; set; }
+    public float Balance { get; private set; }
+    public Customer AccountHolder { get; }
+
+    public Account(string accountType, float initialBalance, Customer customer)
+    {
+        AccountNumber = accountNumberSeed;
+        accountNumberSeed++;
+        AccountType = accountType;
+        Balance = initialBalance;
+        AccountHolder = customer;
+    }
+
+    public void Deposit(float amount)
+    {
+        Balance += amount;
+        Console.WriteLine("Deposited: " + amount + " | New Balance: " + Balance);
+    }
+
+    public bool Withdraw(float amount)
+    {
+        if (amount > Balance)
+        {
+            Console.WriteLine("Insufficient funds.");
+            return false;
+        }
+        Balance -= amount;
+        Console.WriteLine("Withdrawn: " + amount + " | New Balance: " + Balance);
+        return true;
+    }
+
+    public void PrintAccountDetails()
+    {
+        Console.WriteLine("Account Details:");
+        Console.WriteLine("Account Number: " + AccountNumber);
+        Console.WriteLine("Type: " + AccountType);
+        Console.WriteLine("Balance: " + Balance);
+        AccountHolder.PrintCustomerInfo();
+    }
+}
+
+// Bank Class
+class Bank
+{
+    private List<Account> accounts = new List<Account>();
+
+    public Account CreateAccount(Customer customer, string accountType, float initialBalance)
+    {
+        Account newAccount = new Account(accountType, initialBalance, customer);
+        accounts.Add(newAccount);
+        Console.WriteLine("Account created successfully!");
+        return newAccount;
+    }
+
+    public float GetAccountBalance(long accountNumber)
+    {
+        foreach (var acc in accounts)
+        {
+            if (acc.AccountNumber == accountNumber)
+            {
+                return acc.Balance;
+            }
+        }
+        throw new Exception("Account not found.");
+    }
+
+    public void Deposit(long accountNumber, float amount)
+    {
+        foreach (var acc in accounts)
+        {
+            if (acc.AccountNumber == accountNumber)
+            {
+                acc.Deposit(amount);
+                return;
+            }
+        }
+        Console.WriteLine("Account not found.");
+    }
+
+    public void Withdraw(long accountNumber, float amount)
+    {
+        foreach (var acc in accounts)
+        {
+            if (acc.AccountNumber == accountNumber)
+            {
+                acc.Withdraw(amount);
+                return;
+            }
+        }
+        Console.WriteLine("Account not found.");
+    }
+
+    public void Transfer(long fromAccount, long toAccount, float amount)
+    {
+        Account sender = null, receiver = null;
+        foreach (var acc in accounts)
+        {
+            if (acc.AccountNumber == fromAccount) sender = acc;
+            if (acc.AccountNumber == toAccount) receiver = acc;
+        }
+        
+        if (sender == null || receiver == null)
+        {
+            Console.WriteLine("One or both accounts not found.");
+            return;
+        }
+        
+        if (sender.Withdraw(amount))
+        {
+            receiver.Deposit(amount);
+            Console.WriteLine("Transfer successful.");
+        }
+    }
+
+    public void GetAccountDetails(long accountNumber)
+    {
+        foreach (var acc in accounts)
+        {
+            if (acc.AccountNumber == accountNumber)
+            {
+                acc.PrintAccountDetails();
+                return;
+            }
+        }
+        Console.WriteLine("Account not found.");
+    }
+}
+
+ 
+
+
+// Bank Application
+
+
+using System;
+using System.Collections.Generic;
+
+class BankApp
+{
+    static void Main()
+    {
+        Bank bank = new Bank();
+        while (true)
+        {
+            Console.WriteLine("\nBanking System Menu:");
+            Console.WriteLine("1. Create Account");
+            Console.WriteLine("2. Deposit");
+            Console.WriteLine("3. Withdraw");
+            Console.WriteLine("4. Get Balance");
+            Console.WriteLine("5. Transfer");
+            Console.WriteLine("6. Get Account Details");
+            Console.WriteLine("7. Exit");
+            Console.Write("Enter your choice: ");
+
+            string choice = Console.ReadLine();
+            switch (choice)
+            {
+                case "1":
+                    Console.Write("Enter First Name: ");
+                    string firstName = Console.ReadLine();
+                    Console.Write("Enter Last Name: ");
+                    string lastName = Console.ReadLine();
+                    Console.Write("Enter Email: ");
+                    string email = Console.ReadLine();
+                    Console.Write("Enter Phone Number: ");
+                    string phone = Console.ReadLine();
+                    Console.Write("Enter Address: ");
+                    string address = Console.ReadLine();
+
+                    Customer newCustomer = new Customer(new Random().Next(1000, 9999), firstName, lastName, email, phone, address);
+
+                    Console.Write("Enter Account Type (Savings/Current): ");
+                    string accType = Console.ReadLine();
+                    Console.Write("Enter Initial Balance: ");
+                    float balance = float.Parse(Console.ReadLine());
+
+                    bank.CreateAccount(newCustomer, accType, balance);
+                    break;
+
+                case "2":
+                    Console.Write("Enter Account Number: ");
+                    long depositAcc = long.Parse(Console.ReadLine());
+                    Console.Write("Enter Amount: ");
+                    float depositAmount = float.Parse(Console.ReadLine());
+                    bank.Deposit(depositAcc, depositAmount);
+                    break;
+
+                case "3":
+                    Console.Write("Enter Account Number: ");
+                    long withdrawAcc = long.Parse(Console.ReadLine());
+                    Console.Write("Enter Amount: ");
+                    float withdrawAmount = float.Parse(Console.ReadLine());
+                    bank.Withdraw(withdrawAcc, withdrawAmount);
+                    break;
+
+                case "4":
+                    Console.Write("Enter Account Number: ");
+                    long balanceAcc = long.Parse(Console.ReadLine());
+                    Console.WriteLine("Current Balance: " + bank.GetAccountBalance(balanceAcc));
+                    break;
+
+                case "5":
+                    Console.Write("Enter Sender Account Number: ");
+                    long fromAcc = long.Parse(Console.ReadLine());
+                    Console.Write("Enter Receiver Account Number: ");
+                    long toAcc = long.Parse(Console.ReadLine());
+                    Console.Write("Enter Amount: ");
+                    float transferAmount = float.Parse(Console.ReadLine());
+                    bank.Transfer(fromAcc, toAcc, transferAmount);
+                    break;
+
+                case "6":
+                    Console.Write("Enter Account Number: ");
+                    long detailsAcc = long.Parse(Console.ReadLine());
+                    bank.GetAccountDetails(detailsAcc);
+                    break;
+
+                case "7":
+                    Console.WriteLine("Exiting Banking System. Goodbye!");
+                    return;
+
+                default:
+                    Console.WriteLine("Invalid choice. Please try again.");
+                    break;
+            }
+        }
+    }
+}

@@ -1,0 +1,152 @@
+//Task 8
+
+using System;
+
+// Account Class
+class Account
+{
+    public int AccountNumber { get; set; }
+    public string AccountType { get; set; }
+    public double Balance { get; protected set; }
+    protected const double InterestRate = 4.5;
+    protected const double OverdraftLimit = 500; // Overdraft limit for Current Account
+
+    public Account(int accNum, string accType, double balance)
+    {
+        AccountNumber = accNum;
+        AccountType = accType;
+        Balance = balance;
+    }
+
+    public void Deposit(float amount)
+    {
+        Deposit(Convert.ToDouble(amount));
+    }
+    
+    public void Deposit(int amount)
+    {
+        Deposit(Convert.ToDouble(amount));
+    }
+    
+    public virtual void Deposit(double amount)
+    {
+        if (amount > 0)
+        {
+            Balance += amount;
+            Console.WriteLine($"Deposited {amount:C}. New Balance: {Balance:C}");
+        }
+        else
+        {
+            Console.WriteLine("Deposit amount must be positive.");
+        }
+    }
+
+    public void Withdraw(float amount)
+    {
+        Withdraw(Convert.ToDouble(amount));
+    }
+    
+    public void Withdraw(int amount)
+    {
+        Withdraw(Convert.ToDouble(amount));
+    }
+    
+    public virtual void Withdraw(double amount)
+    {
+        if (amount > 0 && amount <= Balance)
+        {
+            Balance -= amount;
+            Console.WriteLine($"Withdrawn {amount:C}. New Balance: {Balance:C}");
+        }
+        else
+        {
+            Console.WriteLine("Insufficient balance or invalid amount.");
+        }
+    }
+
+    public virtual void CalculateInterest()
+    {
+        Console.WriteLine("Interest calculation is only applicable for savings accounts.");
+    }
+}
+
+
+
+// Savings Account Class
+class SavingsAccount : Account
+{
+    public SavingsAccount(int accNum, double balance) : base(accNum, "Savings", balance) { }
+
+    public override void CalculateInterest()
+    {
+        double interest = (Balance * InterestRate) / 100;
+        Balance += interest;
+        Console.WriteLine($"Interest of {interest:C} added. New Balance: {Balance:C}");
+    }
+}
+
+
+
+// Current Account Class
+class CurrentAccount : Account
+{
+    public CurrentAccount(int accNum, double balance) : base(accNum, "Current", balance) { }
+
+    public override void Withdraw(double amount)
+    {
+        if (amount > 0 && (Balance - amount) >= -OverdraftLimit)
+        {
+            Balance -= amount;
+            Console.WriteLine($"Withdrawn {amount:C}. New Balance: {Balance:C}");
+        }
+        else
+        {
+            Console.WriteLine("Overdraft limit exceeded or invalid amount.");
+        }
+    }
+}
+
+
+
+// Bank Class
+class Bank
+{
+    static void Main()
+    {
+        Console.Write("Enter Account Number: ");
+        int accountNumber = int.Parse(Console.ReadLine());
+        Console.WriteLine("Select Account Type: \n1. Savings Account\n2. Current Account");
+        int choice = int.Parse(Console.ReadLine());
+        Account account;
+
+        switch (choice)
+        {
+            case 1:
+                Console.Write("Enter Initial Balance: ");
+                double savingsBalance = double.Parse(Console.ReadLine());
+                account = new SavingsAccount(accountNumber, savingsBalance);
+                break;
+            case 2:
+                Console.Write("Enter Initial Balance: ");
+                double currentBalance = double.Parse(Console.ReadLine());
+                account = new CurrentAccount(accountNumber, currentBalance);
+                break;
+            default:
+                Console.WriteLine("Invalid selection. Defaulting to Savings Account.");
+                Console.Write("Enter Initial Balance: ");
+                double defaultBalance = double.Parse(Console.ReadLine());
+                account = new SavingsAccount(accountNumber, defaultBalance);
+                break;
+        }
+
+        Console.Write("Enter amount to deposit: ");
+        double depositAmount = double.Parse(Console.ReadLine());
+        account.Deposit(depositAmount);
+
+        Console.Write("Enter amount to withdraw: ");
+        double withdrawAmount = double.Parse(Console.ReadLine());
+        account.Withdraw(withdrawAmount);
+
+        account.CalculateInterest();
+    }
+}
