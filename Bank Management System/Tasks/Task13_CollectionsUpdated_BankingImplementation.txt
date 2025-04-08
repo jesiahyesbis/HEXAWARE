@@ -1,0 +1,1127 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BankingManagementOop
+{ 
+public abstract class Account
+{
+    private string accountNumber;
+    private string accountHolderName;
+    private double balance;
+
+    public string AccountNumber
+    {
+        get { return accountNumber; }
+        set
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new BankException("Account Number cannot be empty.");
+            }
+            accountNumber = value;
+        }
+    }
+
+    public string AccountHolderName
+    {
+        get { return accountHolderName; }
+        set
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new BankException("Account Holder Name cannot be empty.");
+            }
+            accountHolderName = value;
+        }
+    }
+
+    public double Balance
+    {
+        get { return balance; }
+        set
+        {
+            if (value < 0)
+            {
+                throw new BankException("Balance cannot be negative.");
+            }
+            balance = value;
+        }
+    }
+
+    public Account() { }
+
+    public Account(string accountNumber, string accountHolderName, double balance)
+    {
+        this.AccountNumber = accountNumber;
+        this.AccountHolderName = accountHolderName;
+        this.Balance = balance;
+    }
+
+    public abstract void Deposit(double amount);
+    public abstract void Withdraw(double amount);
+
+    public override bool Equals(object obj)
+    {
+        Account other = obj as Account;
+        if (other == null) return false;
+        return this.AccountNumber.Equals(other.AccountNumber);
+    }
+
+    public override int GetHashCode()
+    {
+        return this.AccountNumber.GetHashCode();
+    }
+
+    public override string ToString()
+    {
+        return $"Account Number: {AccountNumber}, Holder: {AccountHolderName}, Balance: {Balance}";
+    }
+}
+
+}
+
+//------------------------------------------------
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BankingManagementOop
+{
+    public class AccountComparer : IComparer<Account>
+    {
+        public int Compare(Account x, Account y)
+        {
+            if (x == null || y == null)
+            {
+                throw new BankException("Cannot compare null accounts.");
+            }
+
+            return string.Compare(x.AccountHolderName, y.AccountHolderName, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+}
+
+//------------------------------------------------
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BankingManagementOop
+{
+        public class AccountDaoHashMap
+        {
+            private Dictionary<string, Account> accounts = new Dictionary<string, Account>();
+
+            public void AddAccount(Account account)
+            {
+                if (account == null)
+                {
+                    throw new BankException("Account cannot be null.");
+                }
+
+                if (accounts.ContainsKey(account.AccountNumber))
+                {
+                    throw new BankException("Account with this number already exists.");
+                }
+
+                accounts.Add(account.AccountNumber, account);
+            }
+
+            public List<Account> GetAllAccounts()
+            {
+                return accounts.Values.ToList();
+            }
+
+            public List<Account> GetSortedAccounts(IComparer<Account> comparer)
+            {
+                List<Account> accountList = accounts.Values.ToList();
+                accountList.Sort(comparer);
+                return accountList;
+            }
+
+        /*  public Account FindAccount(string accountNumber)
+          {
+              if (accounts.TryGetValue(accountNumber, out Account account))
+              {
+                  return account;
+              }
+              throw new BankException("Account not found.");
+          }*/
+
+        public Account GetAccountByNumber(string accountNumber)
+        {
+            if (accounts.TryGetValue(accountNumber, out Account account))
+            {
+                return account;
+            }
+            throw new BankException("Account not found.");
+        }
+
+
+        public void RemoveAccount(string accountNumber)
+            {
+                if (!accounts.Remove(accountNumber))
+                {
+                    throw new BankException("Account not found. Cannot remove.");
+                }
+            }
+
+        /* public bool ContainsAccount(string accountNumber)
+         {
+             return accounts.ContainsKey(accountNumber);
+         }*/
+
+        public bool Exists(string accountNumber) 
+        {
+            return accounts.ContainsKey(accountNumber);
+        }
+    }
+    
+}
+
+
+//-------------------------------------------------
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BankingManagementOop
+{
+    public class AccountDaoList
+    {
+        private List<Account> accounts = new List<Account>();
+
+        public void AddAccount(Account account)
+        {
+            if (Exists(account.AccountNumber))
+            {
+                throw new BankException("Account with this number already exists.");
+            }
+            accounts.Add(account);
+        }
+
+        public List<Account> GetAllAccounts()
+        {
+            return new List<Account>(accounts);
+        }
+
+        public List<Account> GetSortedAccounts()
+        {
+            List<Account> sortedList = new List<Account>(accounts);
+            sortedList.Sort(new AccountComparer());
+            return sortedList;
+        }
+
+        public Account GetAccountByNumber(string accountNumber)
+        {
+            foreach (Account acc in accounts)
+            {
+                if (acc.AccountNumber.Equals(accountNumber))
+                {
+                    return acc;
+                }
+            }
+            throw new BankException("Account not found.");
+        }
+
+        public void RemoveAccount(string accountNumber)
+        {
+            Account toRemove = null;
+            foreach (Account acc in accounts)
+            {
+                if (acc.AccountNumber.Equals(accountNumber))
+                {
+                    toRemove = acc;
+                    break;
+                }
+            }
+
+            if (toRemove != null)
+            {
+                accounts.Remove(toRemove);
+            }
+            else
+            {
+                throw new BankException("Account not found to remove.");
+            }
+        }
+
+        public bool Exists(string accountNumber)
+        {
+            foreach (Account acc in accounts)
+            {
+                if (acc.AccountNumber.Equals(accountNumber))
+                    return true;
+            }
+            return false;
+        }
+    }
+}
+
+
+//-------------------------------------------------
+
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BankingManagementOop
+{
+    public class AccountDaoSet
+    {
+        private HashSet<Account> accounts = new HashSet<Account>();
+
+        public void AddAccount(Account account)
+        {
+            if (!accounts.Add(account))
+            {
+                throw new BankException("Account with this number already exists.");
+            }
+        }
+
+        public List<Account> GetAllAccounts()
+        {
+            return new List<Account>(accounts);
+        }
+
+        public List<Account> GetSortedAccounts()
+        {
+            List<Account> sortedList = new List<Account>(accounts);
+            sortedList.Sort(new AccountComparer());
+            return sortedList;
+        }
+
+        public Account GetAccountByNumber(string accountNumber)
+        {
+            foreach (Account acc in accounts)
+            {
+                if (acc.AccountNumber.Equals(accountNumber))
+                {
+                    return acc;
+                }
+            }
+            throw new BankException("Account not found.");
+        }
+
+        public void RemoveAccount(string accountNumber)
+        {
+            Account toRemove = null;
+            foreach (Account acc in accounts)
+            {
+                if (acc.AccountNumber.Equals(accountNumber))
+                {
+                    toRemove = acc;
+                    break;
+                }
+            }
+
+            if (toRemove != null)
+            {
+                accounts.Remove(toRemove);
+            }
+            else
+            {
+                throw new BankException("Account not found to remove.");
+            }
+        }
+
+        public bool Exists(string accountNumber)
+        {
+            foreach (Account acc in accounts)
+            {
+                if (acc.AccountNumber.Equals(accountNumber))
+                    return true;
+            }
+            return false;
+        }
+    }
+}
+
+
+//------------------------------------------------
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BankingManagementOop
+{
+    public class Bank
+    {
+        private readonly object accountDao;
+
+        public Bank(object dao)
+        {
+            accountDao = dao;
+        }
+
+        public void CreateAccount(Account account)
+        {
+            if (accountDao is AccountDaoList listDao)
+            {
+                listDao.AddAccount(account);
+            }
+            else if (accountDao is AccountDaoSet setDao)
+            {
+                setDao.AddAccount(account);
+            }
+            else if (accountDao is AccountDaoHashMap mapDao)
+            {
+                mapDao.AddAccount(account);
+            }
+        }
+
+        public Account FindAccount(string accountNumber)
+        {
+            if (accountDao is AccountDaoList listDao)
+            {
+                return listDao.GetAccountByNumber(accountNumber);
+            }
+            else if (accountDao is AccountDaoSet setDao)
+            {
+                return setDao.GetAccountByNumber(accountNumber);
+            }
+            else if (accountDao is AccountDaoHashMap mapDao)
+            {
+                return mapDao.GetAccountByNumber(accountNumber);
+            }
+            throw new BankException("Unsupported DAO implementation.");
+        }
+
+        public List<Account> GetAllAccounts()
+        {
+            if (accountDao is AccountDaoList listDao)
+            {
+                return listDao.GetAllAccounts();
+            }
+            else if (accountDao is AccountDaoSet setDao)
+            {
+                return setDao.GetAllAccounts();
+            }
+            else if (accountDao is AccountDaoHashMap mapDao)
+            {
+                return mapDao.GetAllAccounts();
+            }
+            throw new BankException("Unsupported DAO implementation.");
+        }
+
+        public void Deposit(string accountNumber, double amount)
+        {
+            Account account = FindAccount(accountNumber);
+            account.Deposit(amount);
+        }
+
+        public void Withdraw(string accountNumber, double amount)
+        {
+            Account account = FindAccount(accountNumber);
+            account.Withdraw(amount);
+        }
+
+        public void RemoveAccount(string accountNumber)
+        {
+            if (accountDao is AccountDaoList listDao)
+            {
+                listDao.RemoveAccount(accountNumber);
+            }
+            else if (accountDao is AccountDaoSet setDao)
+            {
+                setDao.RemoveAccount(accountNumber);
+            }
+            else if (accountDao is AccountDaoHashMap mapDao)
+            {
+                mapDao.RemoveAccount(accountNumber);
+            }
+            else
+            {
+                throw new BankException("Unsupported DAO implementation.");
+            }
+        }
+
+        public bool AccountExists(string accountNumber)
+        {
+            if (accountDao is AccountDaoList listDao)
+            {
+                return listDao.Exists(accountNumber);
+            }
+            else if (accountDao is AccountDaoSet setDao)
+            {
+                return setDao.Exists(accountNumber);
+            }
+            else if (accountDao is AccountDaoHashMap mapDao)
+            {
+                return mapDao.Exists(accountNumber);
+            }
+            return false;
+        }
+    }
+}
+
+//------------------------------------------------
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BankingManagementOop
+{
+    internal class BankException:Exception
+    {
+        public BankException() : base() { }
+        public BankException(string message) : base(message){}
+    }
+}
+
+//------------------------------------------------
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BankingManagementOop
+{
+    public class BankServiceProviderImpl : IBankServiceProvider
+    {
+        private readonly Bank bank;
+
+        public BankServiceProviderImpl(Bank bank)
+        {
+            this.bank = bank;
+        }
+
+        public void DisplayAllAccounts()
+        {
+            List<Account> accounts = bank.GetAllAccounts();
+            if (accounts.Count == 0)
+            {
+                Console.WriteLine("No accounts to display.");
+                return;
+            }
+
+            Console.WriteLine("\n--- All Accounts ---");
+            foreach (Account acc in accounts)
+            {
+                Console.WriteLine(acc);
+            }
+        }
+
+        public void DisplaySortedAccounts()
+        {
+            List<Account> accounts = bank.GetAllAccounts();
+            if (accounts.Count == 0)
+            {
+                Console.WriteLine("No accounts to display.");
+                return;
+            }
+
+            accounts.Sort(new AccountComparer());
+
+            Console.WriteLine("\n--- Sorted Accounts ---");
+            foreach (Account acc in accounts)
+            {
+                Console.WriteLine(acc);
+            }
+        }
+    }
+
+}
+
+//-------------------------------------------------
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BankingManagementOop
+{
+    public class CurrentAccount : Account
+    {
+        public double OverdraftLimit { get; set; }
+
+        public CurrentAccount() : base() { }
+
+        public CurrentAccount(string accountNumber, string accountHolderName, double balance, double overdraftLimit)
+            : base(accountNumber, accountHolderName, balance)
+        {
+            if (overdraftLimit < 0)
+            {
+                throw new BankException("Overdraft limit must be non-negative.");
+            }
+            OverdraftLimit = overdraftLimit;
+        }
+
+        public override void Deposit(double amount)
+        {
+            if (amount <= 0)
+            {
+                throw new BankException("Deposit amount must be positive.");
+            }
+            Balance += amount;
+        }
+
+        public override void Withdraw(double amount)
+        {
+            if (amount <= 0)
+            {
+                throw new BankException("Withdraw amount must be positive.");
+            }
+
+            if (Balance - amount < -OverdraftLimit)
+            {
+                throw new BankException("Withdrawal would exceed overdraft limit.");
+            }
+
+            Balance -= amount;
+        }
+
+        public override string ToString()
+        {
+            return base.ToString() + $", Overdraft Limit: {OverdraftLimit}";
+        }
+    }
+
+}
+
+//-------------------------------------------------
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+
+namespace BankingManagementOop
+{
+    public class Customer
+    {
+        private string customerId;
+        private string customerName;
+        private string email;
+        private string phone;
+
+        public string CustomerId
+        {
+            get { return customerId; }
+            set { customerId = value; }
+        }
+
+        public string CustomerName
+        {
+            get { return customerName; }
+            set { customerName = value; }
+        }
+
+        public string Email
+        {
+            get { return email; }
+            set
+            {
+                if (IsValidEmail(value))
+                    email = value;
+                else
+                    throw new BankException("Invalid Email Address");
+            }
+        }
+
+        public string Phone
+        {
+            get { return phone; }
+            set
+            {
+                if (IsValidPhone(value))
+                    phone = value;
+                else
+                    throw new BankException("Invalid Phone Number");
+            }
+        }
+
+        public Customer() { }
+
+        public Customer(string customerId, string customerName, string email, string phone)
+        {
+            this.CustomerId = customerId;
+            this.CustomerName = customerName;
+            this.Email = email;
+            this.Phone = phone;
+        }
+
+        public override string ToString()
+        {
+            return $"Customer [Id={CustomerId}, Name={CustomerName}, Email={Email}, Phone={Phone}]";
+        }
+
+        private bool IsValidEmail(string email)
+        {
+            return email.Contains("@") && email.Contains(".") && email.IndexOf("@") < email.LastIndexOf(".");
+        }
+
+        private bool IsValidPhone(string phone)
+        {
+            return phone.Length == 10 && long.TryParse(phone, out _);
+        }
+    }
+}
+
+
+//-----------------------------------------------
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BankingManagementOop
+{
+    public class CustomerServiceProviderImpl : ICustomerServiceProvider
+    {
+        private readonly Bank bank;
+
+        public CustomerServiceProviderImpl(Bank bank)
+        {
+            this.bank = bank;
+        }
+
+        public void CreateAccount()
+        {
+            Console.Write("Enter Account Number: ");
+            string accNum = Console.ReadLine();
+
+            Console.Write("Enter Account Holder Name: ");
+            string holder = Console.ReadLine();
+
+            Console.Write("Enter Initial Balance: ");
+            if (!double.TryParse(Console.ReadLine(), out double balance) || balance < 0)
+            {
+                Console.WriteLine("Invalid balance input.");
+                return;
+            }
+
+            Console.Write("Account Type (1. Saving  2. Current): ");
+            string typeChoice = Console.ReadLine();
+
+            Account newAccount = null;
+
+            try
+            {
+                /*if (typeChoice == "1")
+                {
+                    newAccount = new SavingAccount(accNum, holder, balance);
+                }*/
+
+                if (typeChoice == "1")
+                {
+                    Console.Write("Enter Interest Rate (e.g., 0.05 for 5%): ");
+                    if (!double.TryParse(Console.ReadLine(), out double interestRate) || interestRate < 0)
+                    {
+                        Console.WriteLine("Invalid interest rate input.");
+                        return;
+                    }
+                    newAccount = new SavingAccount(accNum, holder, balance, interestRate);
+                }
+
+                else if (typeChoice == "2")
+                {
+                    Console.Write("Enter Overdraft Limit: ");
+                    if (!double.TryParse(Console.ReadLine(), out double overdraftLimit) || overdraftLimit < 0)
+                    {
+                        Console.WriteLine("Invalid overdraft input.");
+                        return;
+                    }
+                    newAccount = new CurrentAccount(accNum, holder, balance, overdraftLimit);
+                }
+                else
+                {
+                    Console.WriteLine("Invalid account type selected.");
+                    return;
+                }
+
+                bank.CreateAccount(newAccount);
+                Console.WriteLine("Account created successfully.");
+            }
+            catch (BankException ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+            }
+        }
+
+        public void RemoveAccount()
+        {
+            Console.Write("Enter Account Number to Remove: ");
+            string accNum = Console.ReadLine();
+
+            try
+            {
+                bank.RemoveAccount(accNum);
+                Console.WriteLine("Account removed successfully.");
+            }
+            catch (BankException ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+            }
+        }
+
+        public void DepositToAccount()
+        {
+            Console.Write("Enter Account Number: ");
+            string accNum = Console.ReadLine();
+
+            Console.Write("Enter Amount to Deposit: ");
+            if (!double.TryParse(Console.ReadLine(), out double amount) || amount <= 0)
+            {
+                Console.WriteLine("Invalid deposit amount.");
+                return;
+            }
+
+            try
+            {
+                bank.Deposit(accNum, amount);
+                Console.WriteLine("Deposit successful.");
+            }
+            catch (BankException ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+            }
+        }
+
+        public void WithdrawFromAccount()
+        {
+            Console.Write("Enter Account Number: ");
+            string accNum = Console.ReadLine();
+
+            Console.Write("Enter Amount to Withdraw: ");
+            if (!double.TryParse(Console.ReadLine(), out double amount) || amount <= 0)
+            {
+                Console.WriteLine("Invalid withdrawal amount.");
+                return;
+            }
+
+            try
+            {
+                bank.Withdraw(accNum, amount);
+                Console.WriteLine("Withdrawal successful.");
+            }
+            catch (BankException ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+            }
+        }
+
+        public void DisplayAccountDetails()
+        {
+            Console.Write("Enter Account Number: ");
+            string accNum = Console.ReadLine();
+
+            try
+            {
+                Account account = bank.FindAccount(accNum);
+                Console.WriteLine(account);
+            }
+            catch (BankException ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+            }
+        }
+    }
+}
+
+
+//-----------------------------------------------
+
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BankingManagementOop {
+    public interface IBankServiceProvider
+    {
+        void DisplayAllAccounts();
+        void DisplaySortedAccounts();
+    }
+
+
+}
+//-------------------------------------------------
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BankingManagementOop
+{
+    public interface ICustomerServiceProvider
+    {
+        void CreateAccount();
+        void RemoveAccount();
+        void DepositToAccount();
+        void WithdrawFromAccount();
+        void DisplayAccountDetails();
+    }
+
+}
+//------------------------------------------------
+
+using System;
+namespace BankingManagementOop
+{
+    public class Program
+    {
+        static void Main(string[] args)
+        {
+            
+            AccountDaoList accountDao = new AccountDaoList();
+            //AccountDaoSet accountDao = new AccountDaoSet();
+            //AccountDaoHashMap accountDao = new AccountDaoHashMap();
+
+            Bank bank = new Bank(accountDao);
+
+            UserInterface ui = new UserInterface(bank);
+            ui.ShowMenu();
+        }
+    }
+}
+
+//-------------------------------------------------
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BankingManagementOop
+{
+
+    public class SavingAccount : Account
+    {
+        private const double MINIMUM_BALANCE = 1000;
+        public double InterestRate { get; set; }
+
+        public SavingAccount() : base()
+        {
+        }
+
+        public SavingAccount(string accountNumber, string accountHolderName, double balance, double interestRate)
+            : base(accountNumber, accountHolderName, balance)
+        {
+            if (balance < MINIMUM_BALANCE)
+            {
+                throw new BankException("Initial balance for Saving Account must be at least ₹1000.");
+            }
+            if (interestRate < 0)
+            {
+                throw new BankException("Interest rate must be non-negative.");
+            }
+
+            InterestRate = interestRate;
+        }
+
+        public override void Deposit(double amount)
+        {
+            if (amount <= 0)
+            {
+                throw new BankException("Deposit amount must be positive.");
+            }
+            Balance += amount;
+        }
+
+        public override void Withdraw(double amount)
+        {
+            if (amount <= 0)
+            {
+                throw new BankException("Withdraw amount must be positive.");
+            }
+            if (Balance - amount < MINIMUM_BALANCE)
+            {
+                throw new BankException("Cannot withdraw. Minimum balance of ₹1000 must be maintained.");
+            }
+            Balance -= amount;
+        }
+
+        public void ApplyInterest()
+        {
+            double interest = Balance * InterestRate;
+            Balance += interest;
+        }
+    }
+
+}
+
+//-------------------------------------------------
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BankingManagementOop
+{
+    public class UserInterface
+    {
+        private readonly CustomerServiceProviderImpl customerService;
+        private readonly BankServiceProviderImpl bankService;
+
+        public UserInterface(Bank bank)
+        {
+            customerService = new CustomerServiceProviderImpl(bank);
+            bankService = new BankServiceProviderImpl(bank);
+        }
+
+        public void ShowMenu()
+        {
+            while (true)
+            {
+                Console.WriteLine("\n--- HMBank Menu ---");
+                Console.WriteLine("1. Create Account");
+                Console.WriteLine("2. Remove Account");
+                Console.WriteLine("3. Deposit to Account");
+                Console.WriteLine("4. Withdraw from Account");
+                Console.WriteLine("5. Display Account Details");
+                Console.WriteLine("6. Display All Accounts");
+                Console.WriteLine("7. Display Sorted Accounts");
+                Console.WriteLine("0. Exit");
+                Console.Write("Enter your choice: ");
+
+                string input = Console.ReadLine();
+
+                switch (input)
+                {
+                    case "1":
+                        customerService.CreateAccount();
+                        break;
+                    case "2":
+                        customerService.RemoveAccount();
+                        break;
+                    case "3":
+                        customerService.DepositToAccount();
+                        break;
+                    case "4":
+                        customerService.WithdrawFromAccount();
+                        break;
+                    case "5":
+                        customerService.DisplayAccountDetails();
+                        break;
+                    case "6":
+                        bankService.DisplayAllAccounts();
+                        break;
+                    case "7":
+                        bankService.DisplaySortedAccounts();
+                        break;
+                    case "0":
+                        Console.WriteLine("Thank you for using HMBank!");
+                        return;
+                    default:
+                        Console.WriteLine("Invalid choice. Please try again.");
+                        break;
+                }
+            }
+        }
+
+    }
+}
+
+//-------------------------------------------------
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BankingManagementOop
+{
+    public class ZeroBalanceAccount : Account
+    {
+        public ZeroBalanceAccount() : base() { }
+
+        public ZeroBalanceAccount(string accountNumber, string accountHolderName, double balance)
+            : base(accountNumber, accountHolderName, balance)
+        {
+            if (balance < 0)
+            {
+                throw new BankException("Initial balance cannot be negative.");
+            }
+        }
+
+        public override void Deposit(double amount)
+        {
+            if (amount <= 0)
+            {
+                throw new BankException("Deposit amount must be positive.");
+            }
+            Balance += amount;
+        }
+
+        public override void Withdraw(double amount)
+        {
+            if (amount <= 0)
+            {
+                throw new BankException("Withdraw amount must be positive.");
+            }
+
+            if (Balance - amount < 0)
+            {
+                throw new BankException("Cannot withdraw. Insufficient balance.");
+            }
+
+            Balance -= amount;
+        }
+
+        public override string ToString()
+        {
+            return base.ToString() + " (Zero Balance Account)";
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
