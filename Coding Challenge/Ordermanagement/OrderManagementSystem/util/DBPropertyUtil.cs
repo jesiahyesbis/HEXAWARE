@@ -9,10 +9,7 @@
     
 //        public static class DBPropertyUtil
 //        {
-//            public static string GetConnectionString()
-//            {
-//                return "Data Source=.;Initial Catalog=OrderManagementDB;Integrated Security=True;";
-//            }
+//           
 //        }
     
 //}
